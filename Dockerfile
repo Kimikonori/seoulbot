@@ -15,4 +15,5 @@ COPY . .
 
 EXPOSE 8080
 
-CMD exec uvicorn main:app --host 0.0.0.0 --port ${PORT:-8080}
+# 셸 형식을 사용하여 PORT 환경변수가 올바르게 대입되도록 수정
+CMD uvicorn main:app --host 0.0.0.0 --port ${PORT:-8080}
