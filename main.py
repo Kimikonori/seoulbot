@@ -9,10 +9,11 @@ from langchain.retrievers.multi_query import MultiQueryRetriever
 from langchain_core.runnables import RunnablePassthrough
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import ChatPromptTemplate
+import uvicorn
 
 app = FastAPI()
 
-# 1. 모델 및 임베딩 설정 (환경 변수 GOOGLE_API_KEY 자동 연동)
+# 임베딩 및 LLM 모델 설정 (환경변수 GOOGLE_API_KEY 자동 연동)
 embeddings = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
 llm = ChatGoogleGenerativeAI(model="gemini-1.5-pro", temperature=0.2)
 
@@ -41,7 +42,6 @@ async def upload_pdf(file: UploadFile = File(...)):
     with open(file_path, "wb") as buffer:
         buffer.write(await file.read())
     
-    # PDF 로드 및 텍스트 분할
     loader = PyPDFLoader(file_path)
     pages = loader.load_and_split()
     text_splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=50)
@@ -87,3 +87,7 @@ async def ask_question(req: QueryRequest):
             "query_expansion": "RunnablePassthrough applied"
         }
     }
+
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 8080))
+    uvicorn.run("main:app", host="0.0.0.0", port=port)
